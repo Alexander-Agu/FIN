@@ -1,5 +1,7 @@
 using FIN.Repository;
+using FIN.Service.UserService;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,12 +15,15 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<FinContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("FinDb")));
 
+builder.Services.AddScoped<IUserService, UserService> ();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
