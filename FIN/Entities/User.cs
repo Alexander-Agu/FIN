@@ -9,6 +9,8 @@
         public string Password { get; set; } = string.Empty;
         public int Phone { get; set; }
         public bool Enabled { get; set; }
+
+        public string Token { get; set; } = string.Empty;
         public DateOnly CreatedAt { get; set; }
         public DateOnly UpdatedAt { get; set; }
 
