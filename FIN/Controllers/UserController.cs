@@ -1,5 +1,6 @@
 ﻿using FIN.Dtos.UserDtos;
 using FIN.Entities;
+using FIN.Enums;
 using FIN.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,21 +19,21 @@ namespace FIN.Controllers
         {
             Dictionary<string, object>? response = await service.RegisterUserAsync(user);
 
-            if (response["result"] == "Error") return BadRequest(response);
+            if (response["result"].Equals(Result.Error)) return BadRequest(response);
 
             return Created(string.Empty, response);
         }
 
 
         /*
-         * Confirms user account
+         * Confirms user account by enabling it
          */
         [HttpGet("confirm-email")]
         public async Task<ActionResult<Dictionary<string, object>>> ConfirmEmail(string token)
         {
             Dictionary<string, object>? response = await service.ConfirmEmailAsync(token);
 
-            if (response["result"] == "Error") return BadRequest(response);
+            if (response["result"].Equals(Result.Error)) return BadRequest(response);
 
             return Ok(response);
         }

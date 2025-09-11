@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 
 namespace FIN.Service.EmailServices
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
-        private readonly string smtpServer = "smtp.gmail.com"; // e.g., smtp.gmail.com
-        private readonly int smtpPort = 587; // TLS port
+        private readonly string smtpServer = "smtp.gmail.com";
+        private readonly int smtpPort = 587;
         private readonly string smtpUser = "testmaila67@gmail.com";
         private readonly string smtpPass = "ccyd lrnw gofv qprg";
 
