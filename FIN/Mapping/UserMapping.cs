@@ -13,7 +13,8 @@ namespace FIN.Mapping
                 Lastname = user.Lastname,
                 Email = user.Email,
                 Phone = user.Phone,
-                Token = Guid.NewGuid().ToString(),
+                ConfirmationToken = Guid.NewGuid().ToString(),
+                ConfirmationDeadline = DateTime.Now,
                 CreatedAt = DateOnly.FromDateTime(DateTime.Now),
             };
         }

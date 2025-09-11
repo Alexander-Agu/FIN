@@ -108,13 +108,24 @@ namespace FIN.Service.UserService
         public async Task<Dictionary<string, object>> ConfirmEmailAsync(string token)
         {
             Dictionary<string, object> response = new Dictionary<string, object>();
-            var user = await context.users.FirstOrDefaultAsync(u => u.Token == token);
+            TimeSpan passedTime;
+            var user = await context.users.FirstOrDefaultAsync(u => u.ConfirmationToken == token); 
 
 
             if (user == null)
             {
                 response.Add("result", Result.Error);
                 response.Add("message", "Failed to verify account");
+                return response;
+            }
+
+            passedTime = user.ConfirmationDeadline - DateTime.UtcNow;
+
+            if (passedTime.Minutes >= 30)
+            {
+                response.Add("result", Result.Error);
+                response.Add("message", "Token expired");
+                return response;
             }
 
             user.Enabled = true;
@@ -248,7 +259,6 @@ namespace FIN.Service.UserService
                 </tr>
               </table>
             </body>";
-            
 
             var emailService = new EmailService();
             await emailService.SendEmailAsync(user.Email, "Confirm your account", htmlMessage);
