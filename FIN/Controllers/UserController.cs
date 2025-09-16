@@ -79,5 +79,19 @@ namespace FIN.Controllers
 
             return Ok(response);
         }
+
+
+        /*
+         * Update user information
+         */
+        [HttpPost("update-user/{userId}")]
+        public async Task<ActionResult<Dictionary<string, object>>> UpdateUser(int userId, [FromBody] UpdateUserDto user)
+        {
+            Dictionary<string, object>? response = await service.UpdateUserAsync(userId, user);
+
+            if (response["result"].Equals(Result.Error)) return BadRequest(response);
+
+            return Ok(response);
+        }
     }
 }

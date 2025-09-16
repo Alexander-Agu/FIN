@@ -18,5 +18,8 @@ namespace FIN.Service.UserService
 
         // Get user data
         public Task<Dictionary<string, object>> GetUserAsync(int Id);
+
+        // Update user information
+        public Task<Dictionary<string, object>> UpdateUserAsync(int id, UpdateUserDto updateUser);
     }
 }

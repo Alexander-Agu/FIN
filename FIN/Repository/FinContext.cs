@@ -18,7 +18,7 @@ namespace FIN.Repository
             user.Lastname = "Agu";
             user.Email = "ahrity67@gmail.com";
             user.Password = "al3x@gu2024#";
-            user.Phone = 784322389;
+            user.Phone = "0784322389";
             user.Enabled = false;
             modelBuilder.Entity<User>().HasData(user);
         }

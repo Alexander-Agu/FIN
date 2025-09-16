@@ -171,7 +171,6 @@ namespace FIN.Service.UserService
             // Validating password
             if (user.Password != login.Password && ValidatePassword(login.Password)) Response(Result.Error, "Invalid email or password");
 
-
             return Response(Result.Success, user.Id);
         }
 
@@ -194,6 +193,36 @@ namespace FIN.Service.UserService
             if (user == null) return Response(Result.Error, "User not found");
 
             return Response(Result.Success, user.ToGetUserDto());
+        }
+
+
+        /*
+         * TODO: Upates user's basic information
+         * 
+         *  Takes in UpdateUserDto and returns a response
+         *  
+         *  If user is updated:
+         *      return { result: Success, message : "User updated" }
+         *  Else:
+         *      return { result: Error, message : "Failed to upadate user" }
+         */
+        public async Task<Dictionary<string, object>> UpdateUserAsync(int id, UpdateUserDto updateUser)
+        {
+            User? user = await context.users.FindAsync(id);
+
+            // Checking if the user exists
+            if (user == null) return Response(Result.Error, "User not found");
+            
+            user.Firstname = string.IsNullOrEmpty(user.Firstname) ? updateUser.Firstname : user.Firstname;
+            user.Lastname = string.IsNullOrEmpty(user.Lastname) ? updateUser.Lastname : user.Lastname;
+
+            if (user.Phone != updateUser.Phone && ValidatePhoneNumber(updateUser.Phone))
+            {
+                user.Phone = updateUser.Phone;
+            }
+
+            await context.SaveChangesAsync();
+            return Response(Result.Success, "User updated");
         }
 
 
@@ -286,11 +315,11 @@ namespace FIN.Service.UserService
         /*
          * HELPER METHOD -> Validates south african number
          */
-        private bool ValidatePhoneNumber(int num)
+        private bool ValidatePhoneNumber(string num)
         {
             string pattern = @"^(?:\+27|0)(6|7|8)\d{8}$";
             Regex regex = new Regex(pattern);
-            return regex.IsMatch(num + "");
+            return regex.IsMatch(num);
         }
 
 
