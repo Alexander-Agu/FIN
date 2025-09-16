@@ -22,7 +22,7 @@ namespace FIN.Service.UserService
             If user was resgistered:
                 return {
                     result: Okay,
-                    message : GetUserDto()
+                    message : User Id or Token
                 }
             Else:
                 return {
@@ -68,7 +68,7 @@ namespace FIN.Service.UserService
             // Send confirmation email after data has been saved
             SendConfirmationEmail(user.Email, user.ConfirmationToken);
 
-            return Response(Result.Success, user.ToGetUserDto());
+            return Response(Result.Success, user.Id);
         }
 
 
@@ -145,6 +145,34 @@ namespace FIN.Service.UserService
             SendConfirmationEmail(user.Email, user.ConfirmationToken);
 
             return Response(Result.Success, "Varification email sent");
+        }
+
+
+        /*
+         * TODO: Login user by validating their info
+         *  
+         *  Takes in LoginDto and returns a response
+         *  
+         *  If Logged in:
+         *      return { result : Okay, message : User Id or Token }
+         *  Else:
+         *      return { result : Error, message : "Invalid password or email" }
+         */
+        public async Task<Dictionary<string, object>> LoginAsync(LoginDto login)
+        {
+            User? user = await context.users.Where(e => e.Email == login.Email).FirstOrDefaultAsync();
+            
+            // Checking if the email exists
+            if (user == null) return Response(Result.Error, "Invalid email or password");
+
+            // Checking if account was enabled
+            if (!user.Enabled) return Response(Result.Error, "Account not verified, resend varification email");
+
+            // Validating password
+            if (user.Password != login.Password && ValidatePassword(login.Password)) Response(Result.Error, "Invalid email or password");
+
+
+            return Response(Result.Success, user.Id);
         }
 
 

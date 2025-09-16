@@ -51,5 +51,19 @@ namespace FIN.Controllers
 
             return Ok(response);
         }
+
+
+        /*
+         * Login user
+         */
+        [HttpPost("login")]
+        public async Task<ActionResult<Dictionary<string, object>>> Login([FromBody] LoginDto login)
+        {
+            Dictionary<string, object>? response = await service.LoginAsync(login);
+
+            if (response["result"].Equals(Result.Error)) return BadRequest(response);
+
+            return Ok(response);
+        }
     }
 }

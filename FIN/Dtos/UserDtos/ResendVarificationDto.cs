@@ -1,4 +1,4 @@
-﻿namespace FIN.Service.UserService
+﻿namespace FIN.Dtos.UserDtos
 {
     public class ResendVarificationDto
     {

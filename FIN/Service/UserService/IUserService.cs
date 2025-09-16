@@ -12,5 +12,8 @@ namespace FIN.Service.UserService
 
         // Re-sends varification email
         public Task<Dictionary<string, object>> ResendVarificationMailAsync(string email);
+
+        // Login
+        public Task<Dictionary<string, object>> LoginAsync(LoginDto login);
     }
 }
