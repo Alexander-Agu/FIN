@@ -65,5 +65,19 @@ namespace FIN.Controllers
 
             return Ok(response);
         }
+
+
+        /*
+         * Get user data
+         */
+        [HttpGet("get-user/{userId}")]
+        public async Task<ActionResult<Dictionary<string, object>>> GetUser(int userId)
+        {
+            Dictionary<string, object>? response = await service.GetUserAsync(userId);
+
+            if (response["result"].Equals(Result.Error)) return BadRequest(response);
+
+            return Ok(response);
+        }
     }
 }

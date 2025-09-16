@@ -7,6 +7,5 @@
         public string Lastname { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public int Phone { get; set; }
-        public string Token { get; set; } = string.Empty;
     }
 }

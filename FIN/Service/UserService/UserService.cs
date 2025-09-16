@@ -177,6 +177,27 @@ namespace FIN.Service.UserService
 
 
         /*
+         * TODO: Returns user data
+         * 
+         *  Takes in user id and returns a response
+         *  
+         *  If user is found:
+         *      return { result: Success, message: GetUserDto() }
+         *  Else:
+         *      return { result : Error, message: "User not found" }
+         */
+        public async Task<Dictionary<string, object>> GetUserAsync(int Id)
+        {
+            User? user = await context.users.FindAsync(Id);
+
+            // Checking if the user exists
+            if (user == null) return Response(Result.Error, "User not found");
+
+            return Response(Result.Success, user.ToGetUserDto());
+        }
+
+
+        /*
          * HELPER METHOD -> Creates a response message and returns it
          */
         private Dictionary<string, object> Response(Result result, object message)

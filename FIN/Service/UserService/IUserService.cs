@@ -15,5 +15,8 @@ namespace FIN.Service.UserService
 
         // Login
         public Task<Dictionary<string, object>> LoginAsync(LoginDto login);
+
+        // Get user data
+        public Task<Dictionary<string, object>> GetUserAsync(int Id);
     }
 }
