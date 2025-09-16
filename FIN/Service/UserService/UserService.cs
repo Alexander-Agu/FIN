@@ -38,33 +38,25 @@ namespace FIN.Service.UserService
             // If any required field is empty return an error response
             if (!ValidateFields(registerUser))
             {
-                response.Add("result", Result.Error);
-                response.Add("message", "Fill in all required fields");
-                return response;
+                return Response(Result.Error, "Fill in all required fields");
             }
 
             // validate email
             if (!ValidateEmail(registerUser.Email))
             {
-                response.Add("result", Result.Error);
-                response.Add("message", "Invalid email type");
-                return response;
+                return Response(Result.Error, "Invalid email type");
             }
 
             // Validate password
             if (!ValidatePassword(registerUser.Password))
             {
-                response.Add("result", Result.Error);
-                response.Add("message", "Invalid password");
-                return response;
+                return Response(Result.Error, "Invalid password");
             }
 
             // Check is email already exists
             if (await context.users.Where(u => u.Email == registerUser.Email).AnyAsync())
             {
-                response.Add("result", Result.Error);
-                response.Add("message", "Email already exists");
-                return response;
+                return Response(Result.Error, "Email already exists");
             }
 
             user.Password = registerUser.Password;
@@ -74,12 +66,9 @@ namespace FIN.Service.UserService
             await context.SaveChangesAsync();
 
             // Send confirmation email after data has been saved
-            SendConfirmationEmail(user, user.Email, user.Token);
+            SendConfirmationEmail(user.Email, user.ConfirmationToken);
 
-            response.Add("result", Result.Success);
-            // Including user data in the response just for testing
-            response.Add("message", user.ToGetUserDto());
-            return response;
+            return Response(Result.Success, user.ToGetUserDto());
         }
 
 
@@ -112,27 +101,62 @@ namespace FIN.Service.UserService
             var user = await context.users.FirstOrDefaultAsync(u => u.ConfirmationToken == token); 
 
 
-            if (user == null)
-            {
-                response.Add("result", Result.Error);
-                response.Add("message", "Failed to verify account");
-                return response;
-            }
+            if (user == null) return Response(Result.Success, "Failed to verify account");
 
             passedTime = user.ConfirmationDeadline - DateTime.UtcNow;
 
-            if (passedTime.Minutes >= 30)
-            {
-                response.Add("result", Result.Error);
-                response.Add("message", "Token expired");
-                return response;
-            }
+            if (passedTime.Minutes >= 30) return Response(Result.Error, "Token expired");
 
             user.Enabled = true;
             await context.SaveChangesAsync();
 
-            response.Add("result", Result.Success);
-            response.Add("message", "Account verified");
+            return Response(Result.Success, "Account verified");
+        }
+
+
+        /*
+         * TODO: Resends user their varification link
+         * 
+         *  In an event that a user failed to verufy their account on time
+         *  they can request to resend the varification email to enable their 
+         *  account
+         *  
+         *  Takes in user email and return a response message
+         *  
+         *  If mail was sent:
+         *      return { result : Success, message : "Varification mail sent" }
+         *  
+         *  else:
+         *      return { result : Error, message "Varification mail failed to send" }
+         *      
+         */
+        public async Task<Dictionary<string, object>> ResendVarificationMailAsync(string email)
+        {
+            User? user = await context.users.Where(e => e.Email == email).FirstOrDefaultAsync();
+            Dictionary<string, object> response = new Dictionary<string, object>();
+
+            // If email was not found
+            if (user == null) return Response(Result.Error, "Email not found, Varification not sent");
+
+
+            user.ConfirmationToken = Guid.NewGuid().ToString();
+            user.ConfirmationDeadline = DateTime.UtcNow;
+            await context.SaveChangesAsync();
+            SendConfirmationEmail(user.Email, user.ConfirmationToken);
+
+            return Response(Result.Success, "Varification email sent");
+        }
+
+
+        /*
+         * HELPER METHOD -> Creates a response message and returns it
+         */
+        private Dictionary<string, object> Response(Result result, object message)
+        {
+            Dictionary<string, object> response = new Dictionary<string, object>();
+
+            response.Add("result", result);
+            response.Add("message", message);
             return response;
         }
 
@@ -224,7 +248,7 @@ namespace FIN.Service.UserService
         /*
          * HELPER METHOD -> sends an account confirmation email
          */
-        private async void SendConfirmationEmail(User user, string email, string token)
+        private async void SendConfirmationEmail(string email, string token)
         {
             var confirmationLink = $"https://localhost:7289/user/confirm-email?token={token}";
             string htmlMessage = $@"
@@ -261,7 +285,7 @@ namespace FIN.Service.UserService
             </body>";
 
             var emailService = new EmailService();
-            await emailService.SendEmailAsync(user.Email, "Confirm your account", htmlMessage);
+            await emailService.SendEmailAsync(email, "Confirm your account", htmlMessage);
         }
     }
 }

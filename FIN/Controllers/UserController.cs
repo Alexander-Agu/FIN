@@ -14,7 +14,7 @@ namespace FIN.Controllers
         /*
          * Creates user account and saves information to the database
          */
-        [HttpPost("/register")]
+        [HttpPost("register")]
         public async Task<ActionResult<Dictionary<string, object>>> Register([FromBody] RegisterUserDto user)
         {
             Dictionary<string, object>? response = await service.RegisterUserAsync(user);
@@ -32,6 +32,20 @@ namespace FIN.Controllers
         public async Task<ActionResult<Dictionary<string, object>>> ConfirmEmail(string token)
         {
             Dictionary<string, object>? response = await service.ConfirmEmailAsync(token);
+
+            if (response["result"].Equals(Result.Error)) return BadRequest(response);
+
+            return Ok(response);
+        }
+
+
+        /*
+         * Resends varification email
+         */
+        [HttpGet("resend-email")]
+        public async Task<ActionResult<Dictionary<string, object>>> Resendvarification([FromQuery] string email)
+        {
+            Dictionary<string, object>? response = await service.ResendVarificationMailAsync(email);
 
             if (response["result"].Equals(Result.Error)) return BadRequest(response);
 
