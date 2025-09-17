@@ -227,6 +227,33 @@ namespace FIN.Service.UserService
 
 
         /*
+         * TODO: Updates email
+         * 
+         *  Takes in new email, updates it and return back a response
+         *  
+         *  If Email updated:
+         *      retern { result : Success, message : "Email updated" }
+         *  Else:
+         *      return { result : Error, message : "Failed to update email" }
+         */
+        public async Task<Dictionary<string, object>> UpdateEmailAsync(int id, UpdateEmailDto updateEmail)
+        {
+            User? user = await context.users.FindAsync(id);
+
+            // Checking if the user exists
+            if (user == null) return Response(Result.Error, "User not found");
+
+            if (user.Email == updateEmail.Email || !ValidateEmail(updateEmail.Email)){
+                return Response(Result.Error, "Failed to update email");
+            }
+
+            user.Email = updateEmail.Email;
+            await context.SaveChangesAsync();
+            return Response(Result.Success, "Email updated");
+        }
+
+
+        /*
          * HELPER METHOD -> Creates a response message and returns it
          */
         private Dictionary<string, object> Response(Result result, object message)

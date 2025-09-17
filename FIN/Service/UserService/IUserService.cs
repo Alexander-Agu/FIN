@@ -21,5 +21,8 @@ namespace FIN.Service.UserService
 
         // Update user information
         public Task<Dictionary<string, object>> UpdateUserAsync(int id, UpdateUserDto updateUser);
+
+        // Update Email
+        public Task<Dictionary<string, object>> UpdateEmailAsync(int id, UpdateEmailDto updateEmail);
     }
 }
