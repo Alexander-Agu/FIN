@@ -96,15 +96,14 @@ namespace FIN.Service.UserService
          */
         public async Task<Dictionary<string, object>> ConfirmEmailAsync(string token)
         {
-            Dictionary<string, object> response = new Dictionary<string, object>();
             TimeSpan passedTime;
-            var user = await context.users.FirstOrDefaultAsync(u => u.ConfirmationToken == token); 
+            var user = await context.users.FirstOrDefaultAsync(u => u.ConfirmationToken == token);
 
-
+            // Check if user exists
             if (user == null) return Response(Result.Success, "Failed to verify account");
 
+            // Check if token expired
             passedTime = user.ConfirmationDeadline - DateTime.UtcNow;
-
             if (passedTime.Minutes >= 30) return Response(Result.Error, "Token expired");
 
             user.Enabled = true;
@@ -250,6 +249,59 @@ namespace FIN.Service.UserService
             user.Email = updateEmail.Email;
             await context.SaveChangesAsync();
             return Response(Result.Success, "Email updated");
+        }
+
+
+        /*
+         * TODO: Sends an email to change password
+         * 
+         *  Sends a comfirmation email to change password , and sends back a response
+         *  
+         *  If email was sent:
+         *      return { result : Success, message : "Comfirmation email sent" }
+         *  Else:
+         *      return { result : Error, message : "Failed to send comfirmation email"
+         */
+        public async Task<Dictionary<string, object>> SendUpdatePasswordEmailAsync(string email)
+        {
+            User? user = await context.users.Where(x => x.Email == email).FirstOrDefaultAsync();
+
+            if (user == null) return Response(Result.Error, "Failed to send mail");
+            
+            SendConfirmationEmail(email, user.ConfirmationToken);
+            return Response(Result.Success, "Comfirmation email sent");
+        }
+
+
+        /*
+         * TODO: Updates password
+         * 
+         *  Takes in user token and password to change the password and sends back
+         *  a response
+         *  
+         *  If password was changed:
+         *      return { result : Success, message : "Password changed" }
+         *  Else:
+         *      return { result : Error, message : "Failed to change password" }
+         */
+        public async Task<Dictionary<string, object>> ResetPasswordAsync(string token, string newPassword)
+        {
+            TimeSpan passedTime;
+            var user = await context.users.FirstOrDefaultAsync(u => u.ConfirmationToken == token);
+
+            // Check if user exists
+            if (user == null) return Response(Result.Success, "Failed to verify account");
+
+            // Check if token expired
+            passedTime = user.ConfirmationDeadline - DateTime.UtcNow;
+            if (passedTime.Minutes >= 30) return Response(Result.Error, "Token expired");
+
+            // Validating the new password
+            if (user.Password == newPassword && !ValidatePassword(newPassword)) return Response(Result.Error, "Invalid password");
+
+            user.Password = newPassword;
+            await context.SaveChangesAsync();
+            return Response(Result.Success, "Password changed");
         }
 
 

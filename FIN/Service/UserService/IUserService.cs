@@ -24,5 +24,11 @@ namespace FIN.Service.UserService
 
         // Update Email
         public Task<Dictionary<string, object>> UpdateEmailAsync(int id, UpdateEmailDto updateEmail);
+
+        // Sends comfirmation email
+        public Task<Dictionary<string, object>> SendUpdatePasswordEmailAsync(string email);
+
+        // Updates password
+        public Task<Dictionary<string, object>> ResetPasswordAsync(string token, string newPassword);
     }
 }

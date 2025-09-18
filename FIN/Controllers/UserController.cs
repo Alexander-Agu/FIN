@@ -107,5 +107,33 @@ namespace FIN.Controllers
 
             return Ok(response);
         }
+
+
+        /*
+         * Forgot password (request)
+         */
+        [HttpPost("reset-password-request")]
+        public async Task<ActionResult<Dictionary<string, object>>> ResetPasswordRequest([FromQuery] string email)
+        {
+            Dictionary<string, object>? response = await service.SendUpdatePasswordEmailAsync(email);
+
+            if (response["result"].Equals(Result.Error)) return BadRequest(response);
+
+            return Ok(response);
+        }
+
+
+        /*
+         * Resets password
+         */
+        [HttpPost("reset-password")]
+        public async Task<ActionResult<Dictionary<string, object>>> ResetPassword([FromQuery] string token, [FromQuery] string email)
+        {
+            Dictionary<string, object>? response = await service.ResetPasswordAsync(token, email);
+
+            if (response["result"].Equals(Result.Error)) return BadRequest(response);
+
+            return Ok(response);
+        }
     }
 }
