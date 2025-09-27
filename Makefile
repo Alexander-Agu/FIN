@@ -1,5 +1,7 @@
 script_dir = ./scripts
 migration_name ?= new_migration
+docker_name ?= fin
+docker_port ?= 5000
 
 # Makes all bash scripts excutable
 activate-scripts:
@@ -40,3 +42,13 @@ remove-migration:
 # Updates database schema
 update-database:
 	$(script_dir)/Update-Database.sh
+
+
+# Builds docker image
+build-image:
+	docker build -t $(docker_name) .
+
+
+# Runs docker container
+run-image:
+	docker run -it -p $(docker_port):$(docker_port) $(docker_name)  
