@@ -1,4 +1,5 @@
 using FIN.Repository;
+using FIN.Service.ToolService;
 using FIN.Service.UserService;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -15,7 +16,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<FinContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("FinDb")));
 
-builder.Services.AddScoped<IUserService, UserService> ();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IToolService, ToolService>();
 
 var app = builder.Build();
 

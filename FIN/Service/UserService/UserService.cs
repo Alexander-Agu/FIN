@@ -7,12 +7,13 @@ using FIN.Enums;
 using FIN.Mapping;
 using FIN.Repository;
 using FIN.Service.EmailServices;
+using FIN.Service.ToolService;
 using Microsoft.EntityFrameworkCore;
 
 
 namespace FIN.Service.UserService
 {
-    public class UserService(FinContext context) : IUserService
+    public class UserService(FinContext context, IToolService toolService) : IUserService
     {
         /* 
             TODO: Register's user account ( save user data to the database )
@@ -38,25 +39,25 @@ namespace FIN.Service.UserService
             // If any required field is empty return an error response
             if (!ValidateFields(registerUser))
             {
-                return Response(Result.Error, "Fill in all required fields");
+                return toolService.Response(Result.Error, "Fill in all required fields");
             }
 
             // validate email
-            if (!ValidateEmail(registerUser.Email))
+            if (!toolService.ValidateEmail(registerUser.Email))
             {
-                return Response(Result.Error, "Invalid email type");
+                return toolService.Response(Result.Error, "Invalid email type");
             }
 
             // Validate password
-            if (!ValidatePassword(registerUser.Password))
+            if (!toolService.ValidatePassword(registerUser.Password))
             {
-                return Response(Result.Error, "Invalid password");
+                return toolService.Response(Result.Error, "Invalid password");
             }
 
             // Check is email already exists
             if (await context.users.Where(u => u.Email == registerUser.Email).AnyAsync())
             {
-                return Response(Result.Error, "Email already exists");
+                return toolService.Response(Result.Error, "Email already exists");
             }
 
             user.Password = registerUser.Password;
@@ -68,7 +69,7 @@ namespace FIN.Service.UserService
             // Send confirmation email after data has been saved
             SendConfirmationEmail(user.Email, user.ConfirmationToken);
 
-            return Response(Result.Success, user.Id);
+            return toolService.Response(Result.Success, user.Id);
         }
 
 
@@ -100,16 +101,16 @@ namespace FIN.Service.UserService
             var user = await context.users.FirstOrDefaultAsync(u => u.ConfirmationToken == token);
 
             // Check if user exists
-            if (user == null) return Response(Result.Success, "Failed to verify account");
+            if (user == null) return toolService.Response(Result.Success, "Failed to verify account");
 
             // Check if token expired
             passedTime = user.ConfirmationDeadline - DateTime.UtcNow;
-            if (passedTime.Minutes >= 30) return Response(Result.Error, "Token expired");
+            if (passedTime.Minutes >= 30) return toolService.Response(Result.Error, "Token expired");
 
             user.Enabled = true;
             await context.SaveChangesAsync();
 
-            return Response(Result.Success, "Account verified");
+            return toolService.Response(Result.Success, "Account verified");
         }
 
 
@@ -135,7 +136,7 @@ namespace FIN.Service.UserService
             Dictionary<string, object> response = new Dictionary<string, object>();
 
             // If email was not found
-            if (user == null) return Response(Result.Error, "Email not found, Varification not sent");
+            if (user == null) return toolService.Response(Result.Error, "Email not found, Varification not sent");
 
 
             user.ConfirmationToken = Guid.NewGuid().ToString();
@@ -143,7 +144,7 @@ namespace FIN.Service.UserService
             await context.SaveChangesAsync();
             SendConfirmationEmail(user.Email, user.ConfirmationToken);
 
-            return Response(Result.Success, "Varification email sent");
+            return toolService.Response(Result.Success, "Varification email sent");
         }
 
 
@@ -162,15 +163,15 @@ namespace FIN.Service.UserService
             User? user = await context.users.Where(e => e.Email == login.Email).FirstOrDefaultAsync();
             
             // Checking if the email exists
-            if (user == null) return Response(Result.Error, "Invalid email or password");
+            if (user == null) return toolService.Response(Result.Error, "Invalid email or password");
 
             // Checking if account was enabled
-            if (!user.Enabled) return Response(Result.Error, "Account not verified, resend varification email");
+            if (!user.Enabled) return toolService.Response(Result.Error, "Account not verified, resend varification email");
 
             // Validating password
-            if (user.Password != login.Password && ValidatePassword(login.Password)) Response(Result.Error, "Invalid email or password");
+            if (user.Password != login.Password && toolService.ValidatePassword(login.Password)) toolService.Response(Result.Error, "Invalid email or password");
 
-            return Response(Result.Success, user.Id);
+            return toolService.Response(Result.Success, user.Id);
         }
 
 
@@ -189,9 +190,9 @@ namespace FIN.Service.UserService
             User? user = await context.users.FindAsync(Id);
 
             // Checking if the user exists
-            if (user == null) return Response(Result.Error, "User not found");
+            if (user == null) return toolService.Response(Result.Error, "User not found");
 
-            return Response(Result.Success, user.ToGetUserDto());
+            return toolService.Response(Result.Success, user.ToGetUserDto());
         }
 
 
@@ -210,18 +211,18 @@ namespace FIN.Service.UserService
             User? user = await context.users.FindAsync(id);
 
             // Checking if the user exists
-            if (user == null) return Response(Result.Error, "User not found");
+            if (user == null) return toolService.Response(Result.Error, "User not found");
             
             user.Firstname = string.IsNullOrEmpty(user.Firstname) ? updateUser.Firstname : user.Firstname;
             user.Lastname = string.IsNullOrEmpty(user.Lastname) ? updateUser.Lastname : user.Lastname;
 
-            if (user.Phone != updateUser.Phone && ValidatePhoneNumber(updateUser.Phone))
+            if (user.Phone != updateUser.Phone && toolService.ValidatePhoneNumber(updateUser.Phone))
             {
                 user.Phone = updateUser.Phone;
             }
 
             await context.SaveChangesAsync();
-            return Response(Result.Success, "User updated");
+            return toolService.Response(Result.Success, "User updated");
         }
 
 
@@ -240,15 +241,15 @@ namespace FIN.Service.UserService
             User? user = await context.users.FindAsync(id);
 
             // Checking if the user exists
-            if (user == null) return Response(Result.Error, "User not found");
+            if (user == null) return toolService.Response(Result.Error, "User not found");
 
-            if (user.Email == updateEmail.Email || !ValidateEmail(updateEmail.Email)){
-                return Response(Result.Error, "Failed to update email");
+            if (user.Email == updateEmail.Email || !toolService.ValidateEmail(updateEmail.Email)){
+                return toolService.Response(Result.Error, "Failed to update email");
             }
 
             user.Email = updateEmail.Email;
             await context.SaveChangesAsync();
-            return Response(Result.Success, "Email updated");
+            return toolService.Response(Result.Success, "Email updated");
         }
 
 
@@ -266,10 +267,10 @@ namespace FIN.Service.UserService
         {
             User? user = await context.users.Where(x => x.Email == email).FirstOrDefaultAsync();
 
-            if (user == null) return Response(Result.Error, "Failed to send mail");
+            if (user == null) return toolService.Response(Result.Error, "Failed to send mail");
             
             SendConfirmationEmail(email, user.ConfirmationToken);
-            return Response(Result.Success, "Comfirmation email sent");
+            return toolService.Response(Result.Success, "Comfirmation email sent");
         }
 
 
@@ -290,70 +291,18 @@ namespace FIN.Service.UserService
             var user = await context.users.FirstOrDefaultAsync(u => u.ConfirmationToken == token);
 
             // Check if user exists
-            if (user == null) return Response(Result.Success, "Failed to verify account");
+            if (user == null) return toolService.Response(Result.Success, "Failed to verify account");
 
             // Check if token expired
             passedTime = user.ConfirmationDeadline - DateTime.UtcNow;
-            if (passedTime.Minutes >= 30) return Response(Result.Error, "Token expired");
+            if (passedTime.Minutes >= 30) return toolService.Response(Result.Error, "Token expired");
 
             // Validating the new password
-            if (user.Password == newPassword && !ValidatePassword(newPassword)) return Response(Result.Error, "Invalid password");
+            if (user.Password == newPassword && !toolService.ValidatePassword(newPassword)) return toolService.Response(Result.Error, "Invalid password");
 
             user.Password = newPassword;
             await context.SaveChangesAsync();
-            return Response(Result.Success, "Password changed");
-        }
-
-
-        /*
-         * HELPER METHOD -> Creates a response message and returns it
-         */
-        private Dictionary<string, object> Response(Result result, object message)
-        {
-            Dictionary<string, object> response = new Dictionary<string, object>();
-
-            response.Add("result", result);
-            response.Add("message", message);
-            return response;
-        }
-
-
-        /*
-            HELPER METHOD -> Validates password
-            
-            Requirements:
-                1. At least 8 letters by length
-                2. At least one uppercase letter
-                3. At least one lowercase letter
-                4. At least one number
-                5. At least one special character
-         */
-        private bool ValidatePassword(string password) {
-            {
-                if (password.Length < 8) return false; // Checks if password is over 8 characters
-
-
-                bool number = false, special = false, lower = false, upper = false;
-
-                for (int x = 0; x <= password.Length - 1; x++)
-                {
-                    if (char.IsNumber(password, x)) number = true; // Checks if password has a number
-
-                    if (char.IsUpper(password, x)) upper = true; // Checks if password has an uppercase letter
-
-                    if (char.IsLower(password, x)) lower = true; // Checks if password has a lowercase letter
-
-                    if ("!@#$%^&*()_{}:''?//><|".Contains(password[x])) special = true; // Checks if password has special characters
-
-                    if (number && special && lower && upper) break; // If all these conditions have been met stop checking
-                }
-
-                if (number && special && lower && upper)
-                {
-                    return true;
-                }
-                return false;
-            }
+            return toolService.Response(Result.Success, "Password changed");
         }
 
 
@@ -377,28 +326,6 @@ namespace FIN.Service.UserService
             if (string.IsNullOrEmpty (user.Password)) return false;
 
             return true;
-        }
-
-
-        /*
-         * HELPER METHOD -> Validates email address
-         */
-        private bool ValidateEmail(string email)
-        {
-            var emailValidator = new EmailAddressAttribute();
-
-            return emailValidator.IsValid(email);
-        }
-
-
-        /*
-         * HELPER METHOD -> Validates south african number
-         */
-        private bool ValidatePhoneNumber(string num)
-        {
-            string pattern = @"^(?:\+27|0)(6|7|8)\d{8}$";
-            Regex regex = new Regex(pattern);
-            return regex.IsMatch(num);
         }
 
 
