@@ -7,6 +7,7 @@ namespace FIN.Repository
     public class FinContext(DbContextOptions<FinContext> options) : DbContext(options)
     {
         public DbSet<User> users => Set<User>();
+        public DbSet<Admin> admins => Set<Admin>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
