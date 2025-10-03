@@ -12,7 +12,7 @@
         public bool Enable { get; set; }
 
         // Tokens
-        public int OTP { get; set; }
+        public string OTP { get; set; } = string.Empty;
         public string Token { get; set; } = string.Empty;
         public string ConfirmationToken { get; set; } = string.Empty;
         public DateTime ConfirmationDeadline { get; set; }

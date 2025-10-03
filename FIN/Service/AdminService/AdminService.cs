@@ -1,9 +1,15 @@
 ﻿using FIN.Dtos.AdminDtos;
+using FIN.Entities;
+using FIN.Enums;
+using FIN.Mapping;
 using FIN.Repository;
+using FIN.Service.EmailServices;
+using FIN.Service.ToolService;
+using Microsoft.EntityFrameworkCore;
 
 namespace FIN.Service.AdminService
 {
-    public class AdminService(FinContext context) : IAdminService
+    public class AdminService(FinContext context, IToolService toolService) : IAdminService
     {
         public Task<Dictionary<string, object>> ConfirmEmailAsync(string token)
         {
@@ -20,9 +26,43 @@ namespace FIN.Service.AdminService
             throw new NotImplementedException();
         }
 
-        public Task<Dictionary<string, object>> RegisterAsync(CreateAdminDto admin)
+
+        // Register admin account ( saves admin data to the databse )
+        public async Task<Dictionary<string, object>> RegisterAsync(CreateAdminDto admin)
         {
-            throw new NotImplementedException();
+            Admin? findAdmin = await context.admins.Where(x => x.Email == admin.Email).FirstOrDefaultAsync();
+
+            // If admin already exist do not create a new account
+            if (findAdmin != null)
+            {
+                return toolService.Response(Result.Error, "Admin already exists");
+            }
+
+            // Validate Email
+            if (!toolService.ValidateEmail(admin.Email))
+            {
+                return toolService.Response(Result.Error, "Invalid email type");
+            }
+
+            // Validate Password
+            if (!toolService.ValidatePassword(admin.Password))
+            {
+                return toolService.Response(Result.Error, "Invalid password type");
+            }
+
+            // Validate phone number if inserted
+            if (!string.IsNullOrEmpty(admin.Phone) && !toolService.ValidatePhoneNumber(admin.Phone))
+            {
+                return toolService.Response(Result.Error, "Invalid phone number");
+            }
+
+            Admin newAdmin = admin.ToCreateAdminEntity();
+
+            await context.admins.AddAsync(newAdmin);
+            await context.SaveChangesAsync();
+
+            SendConfirmationEmail(newAdmin.Email, newAdmin.Token, newAdmin.OTP);
+            return toolService.Response(Result.Success, newAdmin);
         }
 
         public Task<Dictionary<string, object>> ResendVarificarionEmailAsync()
@@ -53,6 +93,60 @@ namespace FIN.Service.AdminService
         public Task<Dictionary<string, object>> UpdatePasswordAsync(int id, UpdatePasswordDto passoword)
         {
             throw new NotImplementedException();
+        }
+
+
+        /*
+         * HELPER METHOD -> sends an account confirmation email
+         */
+        private async void SendConfirmationEmail(string email, string token, string OTP)
+        {
+            var confirmationLink = $"https://localhost:7289/user/confirm-email?token={token}";
+            string htmlMessage = $@"
+            <body style=""margin:0; padding:0; text-align:center;"">
+              <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"">
+                <tr>
+                  <td align=""center"" style=""padding:20px;"">
+
+                    <!-- Content Wrapper -->
+                    <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""600"" style=""max-width:600px; text-align:center;"">
+                      <tr>
+                        <td style=""padding:20px; font-family:Arial, sans-serif;"">
+
+                          <h2 style=""margin:0; font-size:24px; font-weight:bold; color:#000000;"">
+                            Help us protect your <span style=""color:orange;"">account</span>
+                          </h2>
+
+                          <p style=""margin:20px 0; font-size:16px; color:#333333;"">
+                            Please confirm your account by clicking the link below:
+                          </p>
+
+                          <a href='{confirmationLink}' 
+                             style=""display:inline-block; background-color:#ffc93c; color:#ff6f3c; padding:12px 24px; text-decoration:none; border-radius:4px; font-size:16px; font-weight:bold;"">
+                             Confirm Account
+                          </a>
+
+                          <!-- OTP Section -->
+                          <p style=""margin:30px 0 10px; font-size:16px; color:#333333;"">
+                            Or use this One-Time Password (OTP):
+                          </p>
+                          <div style=""display:inline-block; background-color:#f0f0f0; color:orange; 
+                                       padding:12px 24px; font-size:20px; font-weight:bold; 
+                                       border-radius:6px; letter-spacing:2px;"">
+                              {OTP}
+                          </div>
+
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+            </body>";
+
+            var emailService = new EmailService();
+            await emailService.SendEmailAsync(email, "Confirm your account", htmlMessage);
         }
     }
 }
