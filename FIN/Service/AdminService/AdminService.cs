@@ -32,14 +32,31 @@ namespace FIN.Service.AdminService
             return toolService.Response(Result.Success, "Account activated");
         }
 
+
+
         public Task<Dictionary<string, object>> GetAdminAsync(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Dictionary<string, object>> LoginAsync(LoginDto login)
+
+        // Login admins by validating their info
+        public async Task<Dictionary<string, object>> LoginAsync(LoginDto login)
         {
-            throw new NotImplementedException();
+            Admin? admin = await context.admins.Where(e => e.Email == login.Email).FirstOrDefaultAsync();
+
+            // Checking if user exists
+            if (admin == null) {
+                return toolService.Response(Result.Error, "Invalid password or email");
+            }
+
+            // Checking if password is valid
+            if (admin.Password != login.Password)
+            {
+                return toolService.Response(Result.Error, "Invalid password or email");
+            }
+
+            return toolService.Response(Result.Success, "Logged in");
         }
 
 
@@ -81,6 +98,8 @@ namespace FIN.Service.AdminService
             return toolService.Response(Result.Success, newAdmin);
         }
 
+
+        // Resends admin their varification link
         public async Task<Dictionary<string, object>> ResendVarificarionEmailAsync(string email)
         {
             Admin? admin = await context.admins.Where(e => e.Email == email).FirstOrDefaultAsync();
