@@ -163,9 +163,31 @@ namespace FIN.Service.AdminService
             return toolService.Response(Result.Success, "Profile updated");
         }
 
-        public Task<Dictionary<string, object>> UpdateEmailAsync(int id, UpdateEmailDto email)
+
+        // Updates email
+        public async Task<Dictionary<string, object>> UpdateEmailAsync(int id, UpdateEmailDto email)
         {
-            throw new NotImplementedException();
+            Admin? admin = await context.admins.FindAsync(id);
+
+            // Validate admin
+            if (!ValidateAdmin(admin))
+            {
+                return toolService.Response(Result.Error, "failed to updated email");
+            }
+
+            // Validate email
+            bool isNewEmailValid = !string.IsNullOrEmpty(email.Email) && admin.Email != email.Email;
+            if (isNewEmailValid && toolService.ValidateEmail(email.Email)){
+
+                admin.Email = email.Email;
+
+            } else
+            {
+                return toolService.Response(Result.Error, "Invalid email type");
+            }
+
+            await context.SaveChangesAsync();
+            return toolService.Response(Result.Success, "Email updated");
         }
 
         public Task<Dictionary<string, object>> UpdateForgotenPassword(string token, UpdatePasswordDto password)

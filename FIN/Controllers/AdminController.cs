@@ -99,5 +99,20 @@ namespace FIN.Controllers
 
             return Ok(response);
         }
+
+
+        // Update email
+        [HttpPut("update-email")]
+        public async Task<ActionResult<Dictionary<string, object>>> UpdateEmail(int id, [FromBody] UpdateEmailDto email)
+        {
+            Dictionary<string, object>? response = await adminService.UpdateEmailAsync(id, email);
+
+            if (response["result"].Equals(Result.Error))
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
