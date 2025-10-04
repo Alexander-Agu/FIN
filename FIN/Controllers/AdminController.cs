@@ -69,5 +69,20 @@ namespace FIN.Controllers
 
             return Ok(response);
         }
+
+
+        // Fetches user information
+        [HttpGet("get-admin")]
+        public async Task<ActionResult<Dictionary<string, object>>> GetAdmin(int id)
+        {
+            Dictionary<string, object>? response = await adminService.GetAdminAsync(id);
+
+            if (response["result"].Equals(Result.Error))
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

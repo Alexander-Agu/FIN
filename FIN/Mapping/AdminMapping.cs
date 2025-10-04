@@ -36,5 +36,17 @@ namespace FIN.Mapping
                 OTP = GenerateOtp(),
             };
         }
+
+        public static AdminDto ToAdminDto(this Admin admin)
+        {
+            return new AdminDto() {
+                Firstname = admin.Firstname,
+                Lastname = admin.Lastname,
+                Email = admin.Email,
+                Phone = admin.Phone,
+                Created_At = admin.Created_At,
+                Updated_At = admin.Updated_At
+            };
+        }
     }
 }

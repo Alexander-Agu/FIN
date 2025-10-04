@@ -33,10 +33,16 @@ namespace FIN.Service.AdminService
         }
 
 
-
-        public Task<Dictionary<string, object>> GetAdminAsync(int id)
+        // Returns admin data
+        public async Task<Dictionary<string, object>> GetAdminAsync(int id)
         {
-            throw new NotImplementedException();
+            Admin? admin = await context.admins.FindAsync(id);
+
+            if (admin == null) {
+                return toolService.Response(Result.Error,"Admin not found");
+            }
+
+            return toolService.Response(Result.Success, admin.ToAdminDto());
         }
 
 
