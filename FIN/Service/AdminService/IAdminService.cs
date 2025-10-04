@@ -63,7 +63,7 @@ namespace FIN.Service.AdminService
          *  else:
          *      return { result : Error, message "Varification mail failed to send" }   
          */
-        Task<Dictionary<string, object>> ResendVarificarionEmailAsync();
+        Task<Dictionary<string, object>> ResendVarificarionEmailAsync(string email);
 
 
         /*

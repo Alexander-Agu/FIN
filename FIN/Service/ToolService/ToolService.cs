@@ -7,7 +7,7 @@ namespace FIN.Service.ToolService
     public class ToolService : IToolService
     {
         /*
-         * HELPER METHOD -> Creates a response message and returns it
+         * Creates a response message and returns it
          */
         public Dictionary<string, object> Response(Result result, object message)
         {
@@ -19,7 +19,7 @@ namespace FIN.Service.ToolService
         }
 
         /*
-         * HELPER METHOD -> Validates email address
+         *Validates email address
          */
         public bool ValidateEmail(string email)
         {
@@ -29,7 +29,7 @@ namespace FIN.Service.ToolService
         }
 
         /*
-            HELPER METHOD -> Validates password
+           Validates password
             
             Requirements:
                 1. At least 8 letters by length
@@ -68,13 +68,28 @@ namespace FIN.Service.ToolService
         }
 
         /*
-         * HELPER METHOD -> Validates south african number
+         * Validates south african number
          */
         public bool ValidatePhoneNumber(string num)
         {
             string pattern = @"^(?:\+27|0)(6|7|8)\d{8}$";
             Regex regex = new Regex(pattern);
             return regex.IsMatch(num);
+        }
+
+
+        // Generates One-Time-Password
+        public string GenerateOtp()
+        {
+            Random rnd = new Random();
+            string otp = "";
+
+            for (int i = 0; i < 4; i++)
+            {
+                otp += rnd.Next(0, 9);
+            }
+
+            return otp;
         }
     }
 }

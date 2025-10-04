@@ -81,9 +81,23 @@ namespace FIN.Service.AdminService
             return toolService.Response(Result.Success, newAdmin);
         }
 
-        public Task<Dictionary<string, object>> ResendVarificarionEmailAsync()
+        public async Task<Dictionary<string, object>> ResendVarificarionEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            Admin? admin = await context.admins.Where(e => e.Email == email).FirstOrDefaultAsync();
+
+            // Check if admin was found
+            if (admin == null)
+            {
+                return toolService.Response(Result.Error, "Failed to send email, Admin not found");
+            }
+
+            admin.OTP = toolService.GenerateOtp();
+            admin.ConfirmationDeadline = DateTime.UtcNow;
+            await context.SaveChangesAsync();
+
+            SendConfirmationEmail(admin.Email, admin.Token, admin.OTP);
+
+            return toolService.Response(Result.Success, "Email sent");
         }
 
         public Task<Dictionary<string, object>> SendUpdatePasswordEmailAsync(string email)

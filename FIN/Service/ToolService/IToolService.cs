@@ -16,6 +16,7 @@ namespace FIN.Service.ToolService
         // Validates email
         public bool ValidateEmail(string email);
 
-
+        // Generates OTP
+        public string GenerateOtp();
     }
 }

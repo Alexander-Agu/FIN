@@ -6,7 +6,7 @@ namespace FIN.Mapping
 {
     public static class AdminMapping
     {
-        public static string GenerateOtp()
+        private static string GenerateOtp()
         {
             Random rnd = new Random();
             string otp = "";

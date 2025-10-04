@@ -39,5 +39,20 @@ namespace FIN.Controllers
 
             return Ok(response);
         }
+
+
+        // Resends confirmation email
+        [HttpGet("Resend-confirm-email")]
+        public async Task<ActionResult<Dictionary<string, object>>> ResendConfirmationEmail([FromQuery] string email)
+        {
+            Dictionary<string, object>? response = await adminService.ResendVarificarionEmailAsync(email);
+
+            if (response["result"].Equals(Result.Error))
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
