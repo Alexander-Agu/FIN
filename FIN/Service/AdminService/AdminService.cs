@@ -11,9 +11,25 @@ namespace FIN.Service.AdminService
 {
     public class AdminService(FinContext context, IToolService toolService) : IAdminService
     {
-        public Task<Dictionary<string, object>> ConfirmEmailAsync(string token)
+        // Enables or Activates user account
+        public async Task<Dictionary<string, object>> ConfirmEmailAsync(string otp)
         {
-            throw new NotImplementedException();
+            Admin? findAdmin = await context.admins.Where(x => x.OTP == otp).FirstOrDefaultAsync();
+
+            if (findAdmin == null) {
+                return toolService.Response(Result.Error, "Admin not found");
+            }
+
+            // Check if OTP expired
+            if (DateTime.UtcNow > findAdmin.ConfirmationDeadline)
+            {
+                return toolService.Response(Result.Error, "OTP expired");
+            }
+
+            findAdmin.Enable = true;
+            await context.SaveChangesAsync();
+
+            return toolService.Response(Result.Success, "Account activated");
         }
 
         public Task<Dictionary<string, object>> GetAdminAsync(int id)
@@ -101,7 +117,7 @@ namespace FIN.Service.AdminService
          */
         private async void SendConfirmationEmail(string email, string token, string OTP)
         {
-            var confirmationLink = $"https://localhost:7289/user/confirm-email?token={token}";
+            //var confirmationLink = $"https://localhost:7289/admin/confirm-email?token={token}";
             string htmlMessage = $@"
             <body style=""margin:0; padding:0; text-align:center;"">
               <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"">
@@ -118,18 +134,9 @@ namespace FIN.Service.AdminService
                           </h2>
 
                           <p style=""margin:20px 0; font-size:16px; color:#333333;"">
-                            Please confirm your account by clicking the link below:
+                            Please confirm your account by this One-Time Password (OTP):
                           </p>
 
-                          <a href='{confirmationLink}' 
-                             style=""display:inline-block; background-color:#ffc93c; color:#ff6f3c; padding:12px 24px; text-decoration:none; border-radius:4px; font-size:16px; font-weight:bold;"">
-                             Confirm Account
-                          </a>
-
-                          <!-- OTP Section -->
-                          <p style=""margin:30px 0 10px; font-size:16px; color:#333333;"">
-                            Or use this One-Time Password (OTP):
-                          </p>
                           <div style=""display:inline-block; background-color:#f0f0f0; color:orange; 
                                        padding:12px 24px; font-size:20px; font-weight:bold; 
                                        border-radius:6px; letter-spacing:2px;"">

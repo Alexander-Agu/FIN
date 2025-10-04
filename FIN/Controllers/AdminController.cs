@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FIN.Controllers
 {
-    [Route("api/admin")]
+    [Route("admin")]
     [ApiController]
     public class AdminController(IAdminService adminService) : ControllerBase
     {
+        // Register's admin
         [HttpPost("/register")]
         public async Task<ActionResult<Dictionary<string, object>>> Register([FromBody] CreateAdminDto admin)
         {
@@ -22,6 +23,21 @@ namespace FIN.Controllers
             }
 
             return Created(string.Empty, response);
+        }
+
+
+        // Activates admin's account
+        [HttpGet("confirm-email")]
+        public async Task<ActionResult<Dictionary<string, object>>> ConfirmAccount([FromQuery] string otp)
+        {
+            Dictionary<string, object> response = await adminService.ConfirmEmailAsync(otp);
+
+            if (response["result"].Equals(Result.Error))
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
         }
     }
 }

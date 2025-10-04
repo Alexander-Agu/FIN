@@ -97,15 +97,13 @@ namespace FIN.Service.UserService
          */
         public async Task<Dictionary<string, object>> ConfirmEmailAsync(string token)
         {
-            TimeSpan passedTime;
             var user = await context.users.FirstOrDefaultAsync(u => u.ConfirmationToken == token);
 
             // Check if user exists
             if (user == null) return toolService.Response(Result.Success, "Failed to verify account");
 
             // Check if token expired
-            passedTime = user.ConfirmationDeadline - DateTime.UtcNow;
-            if (passedTime.Minutes >= 30) return toolService.Response(Result.Error, "Token expired");
+            if (DateTime.UtcNow > user.ConfirmationDeadline) return toolService.Response(Result.Error, "Token expired");
 
             user.Enabled = true;
             await context.SaveChangesAsync();

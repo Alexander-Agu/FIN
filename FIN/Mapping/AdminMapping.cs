@@ -13,7 +13,7 @@ namespace FIN.Mapping
 
             for (int i = 0; i < 4; i++)
             {
-                otp += rnd.Next(1, 9);
+                otp += rnd.Next(0, 9);
             }
 
             return otp;
