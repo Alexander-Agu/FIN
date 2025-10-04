@@ -93,7 +93,7 @@ namespace FIN.Service.AdminService
 
 
         /*
-         * TODO: Upates admin's basic information
+         * TODO: Upates admin's profile data
          * 
          *  Takes in UpdateAdminProfileDto and returns a response
          *  

@@ -71,11 +71,26 @@ namespace FIN.Controllers
         }
 
 
-        // Fetches user information
+        // Fetches admin information
         [HttpGet("get-admin")]
         public async Task<ActionResult<Dictionary<string, object>>> GetAdmin(int id)
         {
             Dictionary<string, object>? response = await adminService.GetAdminAsync(id);
+
+            if (response["result"].Equals(Result.Error))
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+
+        // Update admin data
+        [HttpPut("update-profile")]
+        public async Task<ActionResult<Dictionary<string, object>>> UpdateProfile(int id, [FromBody] UpdateAdminProfileDto profile)
+        {
+            Dictionary<string, object>? response = await adminService.UpdateAdminProfile(id, profile);
 
             if (response["result"].Equals(Result.Error))
             {

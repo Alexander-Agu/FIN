@@ -38,8 +38,8 @@ namespace FIN.Service.AdminService
         {
             Admin? admin = await context.admins.FindAsync(id);
 
-            if (admin == null) {
-                return toolService.Response(Result.Error,"Admin not found");
+            if (ValidateAdmin(admin)) {
+                return toolService.Response(Result.Error,"Failed to get admin");
             }
 
             return toolService.Response(Result.Success, admin.ToAdminDto());
@@ -51,8 +51,8 @@ namespace FIN.Service.AdminService
         {
             Admin? admin = await context.admins.Where(e => e.Email == login.Email).FirstOrDefaultAsync();
 
-            // Checking if user exists
-            if (admin == null) {
+            // Validate admin
+            if (!ValidateAdmin(admin)) {
                 return toolService.Response(Result.Error, "Invalid password or email");
             }
 
@@ -110,14 +110,14 @@ namespace FIN.Service.AdminService
         {
             Admin? admin = await context.admins.Where(e => e.Email == email).FirstOrDefaultAsync();
 
-            // Check if admin was found
-            if (admin == null)
+            // Validate admin
+            if (!ValidateAdmin(admin))
             {
-                return toolService.Response(Result.Error, "Failed to send email, Admin not found");
+                return toolService.Response(Result.Error, "Failed to send email");
             }
 
             admin.OTP = toolService.GenerateOtp();
-            admin.ConfirmationDeadline = DateTime.UtcNow;
+            admin.ConfirmationDeadline = DateTime.UtcNow.AddMinutes(30);
             await context.SaveChangesAsync();
 
             SendConfirmationEmail(admin.Email, admin.Token, admin.OTP);
@@ -130,9 +130,37 @@ namespace FIN.Service.AdminService
             throw new NotImplementedException();
         }
 
-        public Task<Dictionary<string, object>> UpdateAdminProfile(int id, UpdateAdminProfileDto profile)
+
+        // Upates admin's profile data
+        public async Task<Dictionary<string, object>> UpdateAdminProfile(int id, UpdateAdminProfileDto profile)
         {
-            throw new NotImplementedException();
+            Admin? admin = await context.admins.FindAsync(id);
+
+            // Validate admin
+            if (!ValidateAdmin(admin)) {
+                return toolService.Response(Result.Error, "failed to updated admin");
+            }
+
+            // Checking if admin wants to update Firstname
+            if (!string.IsNullOrEmpty(profile.Firstname) && admin.Firstname != profile.Firstname)
+            {
+                admin.Firstname = profile.Firstname;
+            }
+
+            // Checking if admin wants to update Lastname
+            if (!string.IsNullOrEmpty(profile.Lastname) && admin.Lastname != profile.Lastname)
+            {
+                admin.Lastname = profile.Lastname;
+            }
+
+            // Checking if admin wants to update Phone Number
+            if (!string.IsNullOrEmpty(profile.Phone) && admin.Phone != profile.Phone)
+            {
+                admin.Phone = profile.Phone;
+            }
+
+            await context.SaveChangesAsync();
+            return toolService.Response(Result.Success, "Profile updated");
         }
 
         public Task<Dictionary<string, object>> UpdateEmailAsync(int id, UpdateEmailDto email)
@@ -148,6 +176,29 @@ namespace FIN.Service.AdminService
         public Task<Dictionary<string, object>> UpdatePasswordAsync(int id, UpdatePasswordDto passoword)
         {
             throw new NotImplementedException();
+        }
+
+
+        /*
+         * HELPER METHOD -> Validates admin
+         * 
+         *  Checks if admin's account is avtivated and if they have been found
+         */
+        private bool ValidateAdmin(Admin admin)
+        {
+            // Check if admin was found
+            if (admin == null)
+            {
+                return false;
+            }
+
+            // Checking if account has already been activated
+            if (admin.Enable == false)
+            {
+                return false;
+            }
+
+            return true;
         }
 
 

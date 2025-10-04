@@ -31,7 +31,7 @@ namespace FIN.Mapping
                 Phone = admin.Phone,
                 Enable = false,
                 ConfirmationToken = Guid.NewGuid().ToString(),
-                ConfirmationDeadline = DateTime.Now,
+                ConfirmationDeadline = DateTime.UtcNow.AddMinutes(30),
                 Created_At = DateOnly.FromDateTime(DateTime.Now),
                 OTP = GenerateOtp(),
             };
