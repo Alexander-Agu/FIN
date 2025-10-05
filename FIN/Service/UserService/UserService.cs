@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using FIN.Dtos.UserDtos;
@@ -9,6 +10,7 @@ using FIN.Repository;
 using FIN.Service.EmailServices;
 using FIN.Service.ToolService;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace FIN.Service.UserService
@@ -51,13 +53,19 @@ namespace FIN.Service.UserService
             // Validate password
             if (!toolService.ValidatePassword(registerUser.Password))
             {
-                return toolService.Response(Result.Error, "Invalid password");
+                return toolService.Response(Result.Error, "Invalid password type");
             }
 
-            // Check is email already exists
+            // Check if email already exists
             if (await context.users.Where(u => u.Email == registerUser.Email).AnyAsync())
             {
-                return toolService.Response(Result.Error, "Email already exists");
+                return toolService.Response(Result.Error, "Account already exists");
+            }
+
+            // Validate phone number if user tries to input it
+            if (!string.IsNullOrEmpty(registerUser.Phone) && !toolService.ValidatePhoneNumber(registerUser.Phone))
+            {
+                return toolService.Response(Result.Error, "Invalid phone number type");
             }
 
             user.Password = registerUser.Password;
