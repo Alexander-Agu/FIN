@@ -38,7 +38,7 @@ namespace FIN.Service.AdminService
         {
             Admin? admin = await context.admins.FindAsync(id);
 
-            if (ValidateAdmin(admin)) {
+            if (!ValidateAdmin(admin)) {
                 return toolService.Response(Result.Error,"Failed to get admin");
             }
 
@@ -117,6 +117,7 @@ namespace FIN.Service.AdminService
             }
 
             admin.OTP = toolService.GenerateOtp();
+            admin.ConfirmationToken = Guid.NewGuid().ToString();
             admin.ConfirmationDeadline = DateTime.UtcNow.AddMinutes(30);
             await context.SaveChangesAsync();
 
@@ -125,9 +126,26 @@ namespace FIN.Service.AdminService
             return toolService.Response(Result.Success, "Email sent");
         }
 
-        public Task<Dictionary<string, object>> SendUpdatePasswordEmailAsync(string email)
+
+        // Sends an email to change password
+        public async Task<Dictionary<string, object>> SendUpdatePasswordEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            Admin? admin = await context.admins.Where(e => e.Email == email).FirstOrDefaultAsync();
+
+            if (!ValidateAdmin(admin))
+            {
+                return toolService.Response(Result.Error, "Admin not found");
+            }
+
+            admin.OTP = toolService.GenerateOtp();
+            admin.ConfirmationToken = Guid.NewGuid().ToString();
+            admin.ConfirmationDeadline = DateTime.UtcNow.AddMinutes(30);
+            await context.SaveChangesAsync();
+
+            // Place
+            SendForgotPasswordEmail(admin.Email);
+            return toolService.Response(Result.Success, "Email sent");
+
         }
 
 
@@ -267,5 +285,54 @@ namespace FIN.Service.AdminService
             var emailService = new EmailService();
             await emailService.SendEmailAsync(email, "Confirm your account", htmlMessage);
         }
+
+
+        /*
+         * HELPER METHOD -> sends a forgot password email
+         */
+        private async void SendForgotPasswordEmail(string email)
+        {
+            string htmlMessage = $@"
+            <body style=""margin:0; padding:0; text-align:center;"">
+                <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"">
+                <tr>
+                    <td align=""center"" style=""padding:20px;"">
+
+                    <!-- Content Wrapper -->
+                    <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""600"" style=""max-width:600px; text-align:center;"">
+                        <tr>
+                        <td style=""padding:20px; font-family:Arial, sans-serif;"">
+
+                            <h2 style=""margin:0; font-size:24px; font-weight:bold; color:#000000;"">
+                            Reset your <span style=""color:orange;"">password</span>
+                            </h2>
+
+                            <p style=""margin:20px 0; font-size:16px; color:#333333;"">
+                            We received a request to reset your password. Click the button below to continue:
+                            </p>
+
+                            <a href=""#"" style=""display:inline-block; background-color:#ff6f3c; color:white;
+                                        padding:12px 24px; font-size:16px; font-weight:bold; text-decoration:none;
+                                        border-radius:6px;"">
+                                Reset Password
+                            </a>
+
+                            <p style=""margin-top:20px; font-size:14px; color:#666666;"">
+                            If you didn’t request this, you can safely ignore this email.
+                            </p>
+
+                        </td>
+                        </tr>
+                    </table>
+
+                    </td>
+                </tr>
+                </table>
+            </body>";
+
+            var emailService = new EmailService();
+            await emailService.SendEmailAsync(email, "Reset your password", htmlMessage);
+        }
+
     }
 }

@@ -72,10 +72,10 @@ namespace FIN.Controllers
 
 
         // Fetches admin information
-        [HttpGet("get-admin")]
-        public async Task<ActionResult<Dictionary<string, object>>> GetAdmin(int id)
+        [HttpGet("get-admin/{adminId}")]
+        public async Task<ActionResult<Dictionary<string, object>>> GetAdmin(int adminId)
         {
-            Dictionary<string, object>? response = await adminService.GetAdminAsync(id);
+            Dictionary<string, object>? response = await adminService.GetAdminAsync(adminId);
 
             if (response["result"].Equals(Result.Error))
             {
@@ -87,10 +87,10 @@ namespace FIN.Controllers
 
 
         // Update admin data
-        [HttpPut("update-profile")]
-        public async Task<ActionResult<Dictionary<string, object>>> UpdateProfile(int id, [FromBody] UpdateAdminProfileDto profile)
+        [HttpPut("update-profile/{adminId}")]
+        public async Task<ActionResult<Dictionary<string, object>>> UpdateProfile(int adminId, [FromBody] UpdateAdminProfileDto profile)
         {
-            Dictionary<string, object>? response = await adminService.UpdateAdminProfile(id, profile);
+            Dictionary<string, object>? response = await adminService.UpdateAdminProfile(adminId, profile);
 
             if (response["result"].Equals(Result.Error))
             {
@@ -102,10 +102,25 @@ namespace FIN.Controllers
 
 
         // Update email
-        [HttpPut("update-email")]
-        public async Task<ActionResult<Dictionary<string, object>>> UpdateEmail(int id, [FromBody] UpdateEmailDto email)
+        [HttpPut("update-email/{adminId}")]
+        public async Task<ActionResult<Dictionary<string, object>>> UpdateEmail(int adminId, [FromBody] UpdateEmailDto email)
         {
-            Dictionary<string, object>? response = await adminService.UpdateEmailAsync(id, email);
+            Dictionary<string, object>? response = await adminService.UpdateEmailAsync(adminId, email);
+
+            if (response["result"].Equals(Result.Error))
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+
+        // Sends forgoten email password
+        [HttpGet("forgoten-password-email")]
+        public async Task<ActionResult<Dictionary<string, object>>> SendForgotenPasswordEmail([FromQuery] string email)
+        {
+            Dictionary<string, object>? response = await adminService.SendUpdatePasswordEmailAsync(email);
 
             if (response["result"].Equals(Result.Error))
             {
