@@ -28,3 +28,7 @@ echo "Remove-Migration.sh Active"
 # Update database script
 chmod +x "$dir/Update-Database.sh"
 echo "Update-Database.sh Active"
+
+# Run tests
+chmod +x "$dir/test.sh"
+echo "test.sh Active"

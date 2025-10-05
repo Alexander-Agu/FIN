@@ -51,4 +51,9 @@ build-image:
 
 # Runs docker container
 run-image:
-	docker run -it -p $(docker_port):$(docker_port) $(docker_name)  
+	docker run -it -p $(docker_port):$(docker_port) $(docker_name)
+
+
+## Runs tests
+test:
+	./scripts/test.sh

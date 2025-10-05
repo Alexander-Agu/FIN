@@ -90,7 +90,7 @@ namespace FIN.Controllers
         [HttpPut("update-profile/{adminId}")]
         public async Task<ActionResult<Dictionary<string, object>>> UpdateProfile(int adminId, [FromBody] UpdateAdminProfileDto profile)
         {
-            Dictionary<string, object>? response = await adminService.UpdateAdminProfile(adminId, profile);
+            Dictionary<string, object>? response = await adminService.UpdateAdminProfileAsync(adminId, profile);
 
             if (response["result"].Equals(Result.Error))
             {
@@ -121,6 +121,36 @@ namespace FIN.Controllers
         public async Task<ActionResult<Dictionary<string, object>>> SendForgotenPasswordEmail([FromQuery] string email)
         {
             Dictionary<string, object>? response = await adminService.SendUpdatePasswordEmailAsync(email);
+
+            if (response["result"].Equals(Result.Error))
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+
+        // Updates forgoten password
+        [HttpPut("update-forgoten-password")]
+        public async Task<ActionResult<Dictionary<string, object>>> UpdateForgotenPassword([FromQuery] string token, [FromBody] UpdatePasswordDto password)
+        {
+            Dictionary<string, object>? response = await adminService.UpdateForgotenPasswordAsync(token, password);
+
+            if (response["result"].Equals(Result.Error))
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+
+        // Updates password
+        [HttpPut("update-password/{adminId}")]
+        public async Task<ActionResult<Dictionary<string, object>>> UpdatePassword(int adminId, [FromBody] UpdatePasswordDto password)
+        {
+            Dictionary<string, object>? response = await adminService.UpdatePasswordAsync(adminId, password);
 
             if (response["result"].Equals(Result.Error))
             {

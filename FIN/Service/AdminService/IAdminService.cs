@@ -102,7 +102,7 @@ namespace FIN.Service.AdminService
          *  Else:
          *      return { result: Error, message : "Failed to upadate user" }
          */
-        Task<Dictionary<string, object>> UpdateAdminProfile(int id, UpdateAdminProfileDto profile);
+        Task<Dictionary<string, object>> UpdateAdminProfileAsync(int id, UpdateAdminProfileDto profile);
 
 
         /*
@@ -145,7 +145,7 @@ namespace FIN.Service.AdminService
 
 
         /*
-         * TODO: Updates password
+         * TODO: Updates forgotten password
          * 
          *  Takes in user token and password to change the password and sends back
          *  a response
@@ -155,6 +155,6 @@ namespace FIN.Service.AdminService
          *  Else:
          *      return { result : Error, message : "Failed to change password" }
          */
-        Task<Dictionary<string, object>> UpdateForgotenPassword(string token, UpdatePasswordDto password);
+        Task<Dictionary<string, object>> UpdateForgotenPasswordAsync(string token, UpdatePasswordDto password);
     }
 }

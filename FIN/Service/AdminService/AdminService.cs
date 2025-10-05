@@ -150,7 +150,7 @@ namespace FIN.Service.AdminService
 
 
         // Upates admin's profile data
-        public async Task<Dictionary<string, object>> UpdateAdminProfile(int id, UpdateAdminProfileDto profile)
+        public async Task<Dictionary<string, object>> UpdateAdminProfileAsync(int id, UpdateAdminProfileDto profile)
         {
             Admin? admin = await context.admins.FindAsync(id);
 
@@ -208,14 +208,55 @@ namespace FIN.Service.AdminService
             return toolService.Response(Result.Success, "Email updated");
         }
 
-        public Task<Dictionary<string, object>> UpdateForgotenPassword(string token, UpdatePasswordDto password)
+
+        // Updates forgotten password
+        public async Task<Dictionary<string, object>> UpdateForgotenPasswordAsync(string token, UpdatePasswordDto password)
         {
-            throw new NotImplementedException();
+            Admin? admin = await context.admins.Where(e => e.Token == token).FirstOrDefaultAsync();
+
+            // Validating token
+            if (!ValidateAdmin(admin))
+            {
+                return toolService.Response(Result.Error, "Invalid token");
+            }
+
+            // Checking if the token has expired
+            if (DateTime.UtcNow > admin.ConfirmationDeadline)
+            {
+                return toolService.Response(Result.Error, "Token expired");
+            }
+
+            // Validating new password
+            if (!toolService.ValidatePassword(password.Password)) {
+                return toolService.Response(Result.Error, "Invalid password type");
+            }
+
+            admin.Password = password.Password;
+            await context.SaveChangesAsync();
+            return toolService.Response(Result.Error, "Passowrd changed");
         }
 
-        public Task<Dictionary<string, object>> UpdatePasswordAsync(int id, UpdatePasswordDto passoword)
+
+        // Updates password while logged in
+        public async Task<Dictionary<string, object>> UpdatePasswordAsync(int id, UpdatePasswordDto password)
         {
-            throw new NotImplementedException();
+            Admin? admin = await context.admins.FindAsync(id);
+
+            // Validating token
+            if (!ValidateAdmin(admin))
+            {
+                return toolService.Response(Result.Error, "Invalid token");
+            }
+
+            // Validating new password
+            if (!toolService.ValidatePassword(password.Password))
+            {
+                return toolService.Response(Result.Error, "Invalid password type");
+            }
+
+            admin.Password = password.Password;
+            await context.SaveChangesAsync();
+            return toolService.Response(Result.Error, "Passowrd changed");
         }
 
 
