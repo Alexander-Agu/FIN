@@ -175,9 +175,9 @@ namespace FIN.Service.UserService
             if (!user.Enabled) return toolService.Response(Result.Error, "Account not verified, resend varification email");
 
             // Validating password
-            if (user.Password != login.Password && toolService.ValidatePassword(login.Password)) toolService.Response(Result.Error, "Invalid email or password");
+            if (user.Password != login.Password && !toolService.ValidatePassword(login.Password)) return toolService.Response(Result.Error, "Invalid email or password");
 
-            return toolService.Response(Result.Success, user.Id);
+            return toolService.Response(Result.Success, "Logged in successfully");
         }
 
 
