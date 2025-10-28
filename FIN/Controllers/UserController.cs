@@ -37,7 +37,7 @@ namespace FIN.Controllers
 
             return Ok(response);
         }
-
+        
 
         /*
          * Resends varification email

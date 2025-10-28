@@ -1,8 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Numerics;
-using System.Text.RegularExpressions;
-using FIN.Dtos.UserDtos;
+﻿using FIN.Dtos.UserDtos;
 using FIN.Entities;
 using FIN.Enums;
 using FIN.Mapping;
@@ -10,7 +6,6 @@ using FIN.Repository;
 using FIN.Service.EmailServices;
 using FIN.Service.ToolService;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace FIN.Service.UserService
@@ -77,7 +72,7 @@ namespace FIN.Service.UserService
             // Send confirmation email after data has been saved
             SendConfirmationEmail(user.Email, user.ConfirmationToken);
 
-            return toolService.Response(Result.Success, user.Id);
+            return toolService.Response(Result.Success, "Confirmation email sent");
         }
 
 
@@ -133,8 +128,7 @@ namespace FIN.Service.UserService
          *      return { result : Success, message : "Varification mail sent" }
          *  
          *  else:
-         *      return { result : Error, message "Varification mail failed to send" }
-         *      
+         *      return { result : Error, message "Varification mail failed to send" } 
          */
         public async Task<Dictionary<string, object>> ResendVarificationMailAsync(string email)
         {
