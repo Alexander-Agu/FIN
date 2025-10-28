@@ -30,7 +30,7 @@ namespace Tests.UserServiceTests
             tools = new ToolService();
             service = new UserService(context, tools);
         }
-        
+
         // Dispose context after use
         public void Dispose()
         {
@@ -39,7 +39,7 @@ namespace Tests.UserServiceTests
 
         // Scenario 1: User entered correct details when creating an account
         [Fact]
-        public async void SendEmailToRegisteredUserAsync ()
+        public async void SendEmailToRegisteredUserAsync()
         {
             // Given that user submits all valid information
             // When a request is made to create an account 
@@ -62,5 +62,48 @@ namespace Tests.UserServiceTests
             // And they will be sent an email
             Assert.Equal("Confirmation email sent", result["message"]);
         }
+
+
+        // Scenario 2: User Requesting to resend a varification email
+        [Fact]
+        public async void ResendVarificationEmailAsync()
+        {
+            // Given that user submits all valid information
+            // When a request is made to create an account 
+            // And the information will be saved in the database
+            var registerUser = await service.RegisterUserAsync(new RegisterUserDto()
+            {
+                Firstname = "Joseph",
+                Lastname = "Dabo",
+                Email = "ahrity68@gmail.com",
+                Password = "!@HGJHJK789uhlkn",
+                Phone = "",
+            }); // Adding new user
+
+            // And request to resend the varification email
+            var result = await service.ResendVarificationMailAsync("ahrity68@gmail.com");
+
+            // Then the user will be sent a varification email
+            Assert.Equal("Varification email sent", result["message"]);
+
+            // And the response will be a Success
+            Assert.Equal(Result.Success, result["result"]);
+        }
+
+
+        // Scenario 3: User Requesting to resend a varification email
+        [Fact]
+        public async void ResendVarificationEmailWhenUserIsNotFoundAsync()
+        {
+            // Given that user does not yet exist in the database
+            // And request to resend the varification email
+            var result = await service.ResendVarificationMailAsync("ahrity68@gmail.com");
+
+            // Then the user will not be sent a varification email
+            Assert.Equal("Email not found, Varification not sent", result["message"]);
+
+            // And the response will be a Error
+            Assert.Equal(Result.Error, result["result"]);
+        }
     }
-}                                                                           
+}
