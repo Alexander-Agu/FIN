@@ -161,7 +161,7 @@ namespace FIN.Service.UserService
         public async Task<Dictionary<string, object>> LoginAsync(LoginDto login)
         {
             User? user = await context.users.Where(e => e.Email == login.Email).FirstOrDefaultAsync();
-            
+
             // Checking if the email exists
             if (user == null) return toolService.Response(Result.Error, "Invalid email or password");
 
@@ -212,7 +212,7 @@ namespace FIN.Service.UserService
 
             // Checking if the user exists
             if (user == null) return toolService.Response(Result.Error, "User not found");
-            
+
             user.Firstname = string.IsNullOrEmpty(user.Firstname) ? updateUser.Firstname : user.Firstname;
             user.Lastname = string.IsNullOrEmpty(user.Lastname) ? updateUser.Lastname : user.Lastname;
 
@@ -243,7 +243,8 @@ namespace FIN.Service.UserService
             // Checking if the user exists
             if (user == null) return toolService.Response(Result.Error, "User not found");
 
-            if (user.Email == updateEmail.Email || !toolService.ValidateEmail(updateEmail.Email)){
+            if (user.Email == updateEmail.Email || !toolService.ValidateEmail(updateEmail.Email))
+            {
                 return toolService.Response(Result.Error, "Failed to update email");
             }
 
@@ -268,7 +269,7 @@ namespace FIN.Service.UserService
             User? user = await context.users.Where(x => x.Email == email).FirstOrDefaultAsync();
 
             if (user == null) return toolService.Response(Result.Error, "Failed to send mail");
-            
+
             SendConfirmationEmail(email, user.ConfirmationToken);
             return toolService.Response(Result.Success, "Comfirmation email sent");
         }
@@ -294,11 +295,11 @@ namespace FIN.Service.UserService
             if (user == null) return toolService.Response(Result.Success, "Failed to verify account");
 
             // Check if token expired
-            passedTime = user.ConfirmationDeadline - DateTime.UtcNow;
-            if (passedTime.Minutes >= 30) return toolService.Response(Result.Error, "Token expired");
+            passedTime = DateTime.UtcNow - user.ConfirmationDeadline;
+            if (passedTime.TotalMinutes >= 30) return toolService.Response(Result.Error, "Token expired");
 
             // Validating the new password
-            if (user.Password == newPassword && !toolService.ValidatePassword(newPassword)) return toolService.Response(Result.Error, "Invalid password");
+            if (user.Password == newPassword || !toolService.ValidatePassword(newPassword)) return toolService.Response(Result.Error, "Invalid password");
 
             user.Password = newPassword;
             await context.SaveChangesAsync();
@@ -323,7 +324,7 @@ namespace FIN.Service.UserService
             if (string.IsNullOrEmpty(user.Email)) return false;
 
             // Checking if passworod is empty
-            if (string.IsNullOrEmpty (user.Password)) return false;
+            if (string.IsNullOrEmpty(user.Password)) return false;
 
             return true;
         }

@@ -41,7 +41,7 @@ namespace FIN.Service.ToolService
         public bool ValidatePassword(string password)
         {
             {
-                if (password.Length < 8) return false; // Checks if password is over 8 characters
+                if (password.Length < 9) return false; // Checks if password is less than 9 characters
 
 
                 bool number = false, special = false, lower = false, upper = false;
