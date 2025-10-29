@@ -65,3 +65,91 @@ The project is built to:
 - Deliver a **real-world tool** that improves property maintenance management.  
 
 ---
+
+## How to run the application
+
+### 0. Clone the project and go to the apps directory
+A. Clone the project
+```bash
+git clone https://github.com/Alexander-Agu/FIN.git
+cd FIN
+```
+
+B. Activate scripts
+```bash
+chmod +x ./scripts/Activate-Script.sh
+```
+
+if you are on `linux` or if you have `git bash`
+```bash
+make activate-scripts
+```
+
+### 1. Restore the application
+A. Using dotnet command
+```bash
+dotnet restore
+```
+
+B. Using `linux` or `git bash` on windows
+```bash
+make restore
+```
+
+### 2. Build the application
+A. Using dotnet command
+```bash
+dotnet build
+```
+
+B. Using `linux` or `git bash` on windows
+```bash
+make build
+```
+
+### 3. Run the application
+A. Using dotnet command
+```bash
+dotnet run
+```
+
+B. Using `linux` or `git bash` on windows
+```bash
+make run
+```
+
+## How to run the application using docker
+
+### 1. Build the image first
+A. Build in the terminal
+```bash
+docker build -t "fin" .
+```
+
+B. Using `linux` or `git bash` on windows
+```bash
+make build-image docker_name="fin"
+```
+
+### 2. Run the container
+A. Run in the terminal
+```bash
+docker run -it -p 5000:5000 "fin"
+```
+
+B. Using `linux` or `git bash` on windows
+```bash
+make run-image docker_name="fin" docker_port="5000"
+```
+
+## How to run tests
+### 1. From the root directory go to the Tests folder
+```bash
+cd Tests
+dotnet test --logger "console;verbosity=detailed"
+```
+
+Or if using `linux` or `git bash` on windows -> just go the root directory and run
+```bash
+make test
+```
