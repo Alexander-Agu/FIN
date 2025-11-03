@@ -161,5 +161,129 @@ namespace Tests.AdminServiceTests
             // And the response type is a Error
             Assert.Equal(Result.Error, result["result"]);
         }
+
+        // Scenario 6: When an admin logs into their account
+        [Fact]
+        public async Task LoginAdminTestAsync()
+        {
+            // Given that the admin already created an account
+            Admin? admin = new Admin();
+            admin.Firstname = "Alexander";
+            admin.Lastname = "Agu";
+            admin.Email = "agu1@gmail.com";
+            admin.Password = "asdfghHTGJ5676879@#$%^";
+            admin.Phone = "";
+            admin.Enable = true;
+
+            await context.admins.AddAsync(admin);
+            await context.SaveChangesAsync();
+
+            // And attempts to log into their account
+            var result = await service.LoginAsync(new LoginDto()
+            {
+                Email = "agu1@gmail.com",
+                Password = "asdfghHTGJ5676879@#$%^",
+            });
+
+            // Then they get logged into their account 
+            // And the response message is Logged in
+            Assert.Equal("Logged in", result["message"]);
+
+            // And the response type is a Success
+            Assert.Equal(Result.Success, result["result"]);
+        }
+
+        // Scenario 7: When an admin logs into their account with an un-activated account
+        [Fact]
+        public async Task LoginUnActivatedAdminTestAsync()
+        {
+            // Given that the admin already created an account thats not activated
+            Admin? admin = new Admin();
+            admin.Firstname = "Alexander";
+            admin.Lastname = "Agu";
+            admin.Email = "agu1@gmail.com";
+            admin.Password = "asdfghHTGJ5676879@#$%^";
+            admin.Phone = "";
+            admin.Enable = false;
+
+            await context.admins.AddAsync(admin);
+            await context.SaveChangesAsync();
+
+            // And attempts to log into their account
+            var result = await service.LoginAsync(new LoginDto()
+            {
+                Email = "agu1@gmail.com",
+                Password = "asdfghHTGJ5676879@#$%^",
+            });
+
+            // Then they will not get logged into their account 
+            // And the response message is Invalid password or email
+            Assert.Equal("Invalid password or email", result["message"]);
+
+            // And the response type is a Error
+            Assert.Equal(Result.Error, result["result"]);
+        }
+
+        // Scenario 8: When an admin logs into their account win an invalid email
+        [Fact]
+        public async Task LoginAdminWithInvalidEmailTestAsync()
+        {
+            // Given that the admin already created an account
+            Admin? admin = new Admin();
+            admin.Firstname = "Alexander";
+            admin.Lastname = "Agu";
+            admin.Email = "agu1@gmail.com";
+            admin.Password = "asdfghHTGJ5676879@#$%^";
+            admin.Phone = "";
+            admin.Enable = true;
+
+            await context.admins.AddAsync(admin);
+            await context.SaveChangesAsync();
+
+            // And attempts to log into their account with an invalid email
+            var result = await service.LoginAsync(new LoginDto()
+            {
+                Email = "yoman@gmail.com",
+                Password = "asdfghHTGJ5676879@#$%^",
+            });
+
+            // Then they will not get logged into their account 
+            // And the response message is Invalid password or email
+            Assert.Equal("Invalid password or email", result["message"]);
+
+            // And the response type is a Error
+            Assert.Equal(Result.Error, result["result"]);
+        }
+
+        // Scenario 9: When an admin logs into their account win an invalid password
+        [Fact]
+        public async Task LoginAdminWithInvalidPasswordTestAsync()
+        {
+            // Given that the admin already created an account
+            Admin? admin = new Admin();
+            admin.Firstname = "Alexander";
+            admin.Lastname = "Agu";
+            admin.Email = "agu1@gmail.com";
+            admin.Password = "asdfghHTGJ5676879@#$%^";
+            admin.Phone = "";
+            admin.Enable = true;
+
+            await context.admins.AddAsync(admin);
+            await context.SaveChangesAsync();
+
+            // And attempts to log into their account with an invalid password
+            var result = await service.LoginAsync(new LoginDto()
+            {
+                Email = "agu1@gmail.com",
+                Password = "asdfghHTGJ567^",
+            });
+
+            // Then they will not get logged into their account 
+            // And the response message is Invalid password or email
+            Assert.Equal("Invalid password or email", result["message"]);
+
+            // And the response type is a Error
+            Assert.Equal(Result.Error, result["result"]);
+        }
     }
 }
