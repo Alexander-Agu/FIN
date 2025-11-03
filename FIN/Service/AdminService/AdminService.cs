@@ -16,7 +16,8 @@ namespace FIN.Service.AdminService
         {
             Admin? findAdmin = await context.admins.Where(x => x.OTP == otp).FirstOrDefaultAsync();
 
-            if (findAdmin == null) {
+            if (findAdmin == null)
+            {
                 return toolService.Response(Result.Error, "Admin not found");
             }
 
@@ -38,8 +39,9 @@ namespace FIN.Service.AdminService
         {
             Admin? admin = await context.admins.FindAsync(id);
 
-            if (!ValidateAdmin(admin)) {
-                return toolService.Response(Result.Error,"Failed to get admin");
+            if (!ValidateAdmin(admin))
+            {
+                return toolService.Response(Result.Error, "Failed to get admin");
             }
 
             return toolService.Response(Result.Success, admin.ToAdminDto());
@@ -52,7 +54,8 @@ namespace FIN.Service.AdminService
             Admin? admin = await context.admins.Where(e => e.Email == login.Email).FirstOrDefaultAsync();
 
             // Validate admin
-            if (!ValidateAdmin(admin)) {
+            if (!ValidateAdmin(admin))
+            {
                 return toolService.Response(Result.Error, "Invalid password or email");
             }
 
@@ -101,7 +104,7 @@ namespace FIN.Service.AdminService
             await context.SaveChangesAsync();
 
             SendConfirmationEmail(newAdmin.Email, newAdmin.Token, newAdmin.OTP);
-            return toolService.Response(Result.Success, newAdmin);
+            return toolService.Response(Result.Success, "Admin account created");
         }
 
 
@@ -155,7 +158,8 @@ namespace FIN.Service.AdminService
             Admin? admin = await context.admins.FindAsync(id);
 
             // Validate admin
-            if (!ValidateAdmin(admin)) {
+            if (!ValidateAdmin(admin))
+            {
                 return toolService.Response(Result.Error, "failed to updated admin");
             }
 
@@ -195,11 +199,13 @@ namespace FIN.Service.AdminService
 
             // Validate email
             bool isNewEmailValid = !string.IsNullOrEmpty(email.Email) && admin.Email != email.Email;
-            if (isNewEmailValid && toolService.ValidateEmail(email.Email)){
+            if (isNewEmailValid && toolService.ValidateEmail(email.Email))
+            {
 
                 admin.Email = email.Email;
 
-            } else
+            }
+            else
             {
                 return toolService.Response(Result.Error, "Invalid email type");
             }
@@ -227,7 +233,8 @@ namespace FIN.Service.AdminService
             }
 
             // Validating new password
-            if (!toolService.ValidatePassword(password.Password)) {
+            if (!toolService.ValidatePassword(password.Password))
+            {
                 return toolService.Response(Result.Error, "Invalid password type");
             }
 

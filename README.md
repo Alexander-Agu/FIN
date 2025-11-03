@@ -78,6 +78,7 @@ cd FIN
 B. Activate scripts
 ```bash
 chmod +x ./scripts/Activate-Script.sh
+./scripts/Activate-Script.sh
 ```
 
 if you are on `linux` or if you have `git bash`
