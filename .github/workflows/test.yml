@@ -15,6 +15,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install Make
+        run: |
+          apt-get update
+          apt-get install -y make
+
       - name: Activate Scripts
         run: make activate-scripts
 
