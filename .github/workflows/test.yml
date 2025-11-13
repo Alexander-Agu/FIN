@@ -27,8 +27,14 @@ jobs:
       - run: |
           apt-get update
           apt-get install -y make
+      - run: make activate-scripts
       - run: make restore
       - run: make build
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-output
+          path: ./bin/
 
   test:
     runs-on: ubuntu-latest
@@ -41,5 +47,11 @@ jobs:
       - run: |
           apt-get update
           apt-get install -y make
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-output
+          path: ./bin/
+      - run: make activate-scripts
       - run: make test
 #Deploy stage coming soon
