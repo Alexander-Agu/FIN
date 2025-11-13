@@ -31,7 +31,7 @@ jobs:
       - run: make restore
       - run: make build
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-output
           path: ./bin/
@@ -48,7 +48,7 @@ jobs:
           apt-get update
           apt-get install -y make
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-output
           path: ./bin/
