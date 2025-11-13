@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: ./bin/
+          path: "**/bin/Debug/net*/"
 
   test:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-output
-          path: ./bin/
+          path: "**/bin/Debug/net*/"
       - run: make activate-scripts
       - run: make test
 #Deploy stage coming soon
