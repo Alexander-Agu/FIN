@@ -23,6 +23,10 @@ jobs:
       image: mcr.microsoft.com/dotnet/sdk:9.0
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - run: |
+          apt-get update
+          apt-get install -y make
       - run: make restore
       - run: make build
 
@@ -33,5 +37,9 @@ jobs:
       image: mcr.microsoft.com/dotnet/sdk:9.0
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - run: |
+          apt-get update
+          apt-get install -y make
       - run: make test
 #Deploy stage coming soon
